@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #333; /* Dark background */
+            color: #fff; /* Light text color */
+            padding: 20px;
+        }
+        h1 {
+            color: #f0f0f0; /* Light gray text color */
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        #result {
+            margin-top: 10px;
+            color: #f0f0f0; /* Light gray text color */
+        }
+        #history {
+            background-color: #444; /* Dark gray background for history */
+            color: #fff; /* Light text color for history */
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1); /* Light shadow */
+            margin-top: 20px;
+        }
+        #history p {
+            margin-bottom: 5px;
+        }
+        input[type="text"], button {
+            background-color: #555; /* Darker gray input background */
+            color: #fff; /* Light text color for inputs */
+            border: none;
+            padding: 8px;
+            margin-right: 5px;
+        }
+        button {
+            background-color: #777; /* Darker gray button background */
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #999; /* Lighter gray button background on hover */
+        }
+    </style>
+</head>
+<body>
+    <h1>URL Shortener</h1>
+    <form id="urlForm">
+        <label for="long_url">Enter a long URL:</label>
+        <input type="text" id="long_url" name="long_url">
+        <button type="submit">Shorten</button>
+    </form>
+    <div id="result"></div>
+    <h2>History</h2>
+    <div id="history"></div>
+
+    <script>
+        document.getElementById('urlForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const long_url = document.getElementById('long_url').value;
+            const response = await fetch('/shorten', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'long_url': long_url
+                })
+            });
+            const data = await response.json();
+            document.getElementById('result').innerHTML = `Short URL: <a href="/${data.short_url}" style="color: #f0f0f0;">${data.short_url}</a>`;
+            fetchHistory();
+        });
+
+        async function fetchHistory() {
+            const response = await fetch('/history');
+            const data = await response.json();
+            const historyDiv = document.getElementById('history');
+            historyDiv.innerHTML = '';
+            data.forEach(item => {
+                historyDiv.innerHTML += `<p>Short URL: <a href="/${item.short_url}" style="color: #fff;">${item.short_url}</a>, Long URL: ${item.long_url}</p>`;
+            });
+        }
+
+        // Fetch history on page load
+        fetchHistory();
+    </script>
+</body>
+</html>
